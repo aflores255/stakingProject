@@ -76,7 +76,7 @@ The contract has been tested using **Foundry**. The **FloStakingTest.t.sol** fil
 ## 💽 **Installation & Testing**
 1. Clone the repository:
    ```sh
-   git clone https://github.com/your-repo/flo-staking.git
+   git clone https://github.com/aflores255/stakingProject
    cd flo-staking
    ```
 2. Install dependencies:
