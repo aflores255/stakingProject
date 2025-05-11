@@ -9,11 +9,9 @@ import "../src/FloToken.sol";
 import "../src/FloStaking.sol";
 import "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
-
 //3. Contract
 
 contract FloStakingTest is Test {
-
     FloToken floToken;
     FloStaking floStaking;
     //FloToken constructor parameters
@@ -26,39 +24,30 @@ contract FloStakingTest is Test {
     uint256 fixedStakingAmount = 10 ether;
     uint256 rewardPerPeriod = 1 ether;
 
-    function setUp() external{
-
+    function setUp() external {
         floToken = new FloToken(name_, symbol_);
-        floStaking = new FloStaking(address(floToken),owner, stakingPeriod,  fixedStakingAmount,  rewardPerPeriod);
-
-
+        floStaking = new FloStaking(address(floToken), owner, stakingPeriod, fixedStakingAmount, rewardPerPeriod);
     }
 
     // Test contracts deployments
 
-    function testDeployStakingContract() external view{
-
+    function testDeployStakingContract() external view {
         assert(address(floStaking) != address(0));
-
     }
 
-    function testDeployTokenContract() external view{
-
+    function testDeployTokenContract() external view {
         assert(address(floToken) != address(0));
-
-    
     }
 
     // Test change staking period
 
-    function testChangeStakingPeriodNotOwner() external{
+    function testChangeStakingPeriodNotOwner() external {
         uint256 newStakingPeriod_ = 1 days;
         vm.expectRevert();
         floStaking.changeStakingPeriod(newStakingPeriod_);
-
     }
 
-    function testChangeStakingPeriodOwner() external{
+    function testChangeStakingPeriodOwner() external {
         uint256 newStakingPeriod_ = 1 days;
         vm.startPrank(owner);
         uint256 stakingPeriodBefore = floStaking.stakingPeriod();
@@ -68,13 +57,12 @@ contract FloStakingTest is Test {
         assert(stakingPeriodBefore != stakingPeriodAfter);
         assert(stakingPeriodAfter == newStakingPeriod_);
         vm.stopPrank();
-
     }
 
     // Test Fund
-    function testFundContract() external{
+    function testFundContract() external {
         vm.startPrank(owner);
-        vm.deal(owner,1 ether);
+        vm.deal(owner, 1 ether);
         uint256 etherValue = 1 ether;
         uint256 balanceBefore = address(floStaking).balance;
         (bool success,) = address(floStaking).call{value: etherValue}("");
@@ -84,23 +72,19 @@ contract FloStakingTest is Test {
 
         assert(balanceAfter - balanceBefore == etherValue);
         vm.stopPrank();
-
     }
 
-    // Deposit
+    // Test Deposit
 
-    function testIncorrectAmountDeposit() external{
-
+    function testIncorrectAmountDeposit() external {
         uint256 depositAmount_ = 1 ether;
         vm.startPrank(user1);
         vm.expectRevert();
         floStaking.deposit(depositAmount_);
         vm.stopPrank();
-
     }
 
-    function testAmountDeposit() external{
-
+    function testAmountDeposit() external {
         uint256 depositAmount_ = floStaking.fixedStakingAmount();
         vm.startPrank(user1);
         floToken.mint(depositAmount_);
@@ -109,7 +93,7 @@ contract FloStakingTest is Test {
         //Approve tx
         IERC20(floToken).approve(address(floStaking), depositAmount_);
         floStaking.deposit(depositAmount_);
-         uint256 userBalanceAfter = floStaking.userBalance(user1);
+        uint256 userBalanceAfter = floStaking.userBalance(user1);
         uint256 rewardTimeAfter = floStaking.rewardTime(user1);
 
         assert(userBalanceAfter - userBalanceBefore == depositAmount_);
@@ -117,11 +101,9 @@ contract FloStakingTest is Test {
         assert(rewardTimeAfter == block.timestamp);
 
         vm.stopPrank();
-
     }
 
-    function testDepositExceeded() external{
-
+    function testDepositExceeded() external {
         uint256 depositAmount_ = floStaking.fixedStakingAmount();
         vm.startPrank(user1);
         floToken.mint(depositAmount_);
@@ -141,22 +123,19 @@ contract FloStakingTest is Test {
         floStaking.deposit(depositAmount_);
 
         vm.stopPrank();
-
     }
 
     // test withdraw
 
-    function testWithdrawNoBalance() external{
-
+    function testWithdrawNoBalance() external {
         vm.startPrank(user1);
         vm.expectRevert("No amount to withdraw");
         floStaking.withdraw();
         vm.stopPrank();
-
     }
 
-    function testWithdraw() external{
-        uint256 depositAmount_ = floStaking.fixedStakingAmount();  
+    function testWithdraw() external {
+        uint256 depositAmount_ = floStaking.fixedStakingAmount();
         vm.startPrank(user1);
         floToken.mint(depositAmount_);
         uint256 userBalanceBefore = floStaking.userBalance(user1);
@@ -184,19 +163,18 @@ contract FloStakingTest is Test {
         assert(userTokensAfterWithdraw == userTokens + userBalanceBeforeWithdraw);
 
         vm.stopPrank();
-  
     }
 
     // Claim tests
 
-    function testClaimWhenNotStaking() external{
+    function testClaimWhenNotStaking() external {
         vm.startPrank(user1);
         vm.expectRevert("Balance is zero");
         floStaking.claimRewards();
         vm.stopPrank();
     }
 
-    function testClaimStakingPeriod() external{
+    function testClaimStakingPeriod() external {
         uint256 depositAmount_ = floStaking.fixedStakingAmount();
         vm.startPrank(user1);
         floToken.mint(depositAmount_);
@@ -205,7 +183,7 @@ contract FloStakingTest is Test {
         //Approve tx
         IERC20(floToken).approve(address(floStaking), depositAmount_);
         floStaking.deposit(depositAmount_);
-         uint256 userBalanceAfter = floStaking.userBalance(user1);
+        uint256 userBalanceAfter = floStaking.userBalance(user1);
         uint256 rewardTimeAfter = floStaking.rewardTime(user1);
 
         assert(userBalanceAfter - userBalanceBefore == depositAmount_);
@@ -214,10 +192,9 @@ contract FloStakingTest is Test {
         vm.expectRevert("wait for staking period");
         floStaking.claimRewards();
         vm.stopPrank();
-
     }
 
-    function testClaimNoBalance() external{
+    function testClaimNoBalance() external {
         uint256 depositAmount_ = floStaking.fixedStakingAmount();
         vm.startPrank(user1);
         floToken.mint(depositAmount_);
@@ -226,20 +203,19 @@ contract FloStakingTest is Test {
         //Approve tx
         IERC20(floToken).approve(address(floStaking), depositAmount_);
         floStaking.deposit(depositAmount_);
-         uint256 userBalanceAfter = floStaking.userBalance(user1);
+        uint256 userBalanceAfter = floStaking.userBalance(user1);
         uint256 rewardTimeAfter = floStaking.rewardTime(user1);
 
         assert(userBalanceAfter - userBalanceBefore == depositAmount_);
         assert(rewardTimeBefore == 0);
         assert(rewardTimeAfter == block.timestamp);
-        vm.warp(block.timestamp+stakingPeriod);
+        vm.warp(block.timestamp + stakingPeriod);
         vm.expectRevert("Claim failed");
         floStaking.claimRewards();
         vm.stopPrank();
-
     }
 
-        function testClaim() external{
+    function testClaim() external {
         uint256 depositAmount_ = floStaking.fixedStakingAmount();
         vm.startPrank(user1);
         floToken.mint(depositAmount_);
@@ -257,20 +233,19 @@ contract FloStakingTest is Test {
         vm.stopPrank();
         vm.startPrank(owner);
         uint256 etherToFund = 100 ether;
-        vm.deal(owner,etherToFund);
+        vm.deal(owner, etherToFund);
         (bool success,) = address(floStaking).call{value: etherToFund}("");
-        require(success,"Fund failed");
+        require(success, "Fund failed");
         vm.stopPrank();
         vm.startPrank(user1);
-        vm.warp(block.timestamp+stakingPeriod);
+        vm.warp(block.timestamp + stakingPeriod);
         uint256 userEtherBalanceBefore = address(user1).balance;
         floStaking.claimRewards();
         uint256 userEtherBalanceAfter = address(user1).balance;
         uint256 rewardTimeUser = floStaking.rewardTime(user1);
-        assert(userEtherBalanceAfter-userEtherBalanceBefore == rewardPerPeriod);
+        assert(userEtherBalanceAfter - userEtherBalanceBefore == rewardPerPeriod);
         assert(rewardTimeUser == block.timestamp);
         vm.stopPrank();
-
     }
 
     function testMultipleClaims() public {
@@ -298,22 +273,15 @@ contract FloStakingTest is Test {
 
         assert(balanceAfterSecondClaim - balanceAfterFirstClaim == rewardPerPeriod);
         vm.stopPrank();
-}
+    }
 
-// Fuzz testing
+    // Fuzz testing
 
-function testFuzzInvalidDeposit(uint256 amount_) public {
-    vm.assume(amount_ != floStaking.fixedStakingAmount());
-    vm.startPrank(user1);
-    vm.expectRevert("Incorrect Amount");
-    floStaking.deposit(amount_);
-    vm.stopPrank();
-}
-
-
-
-
-
-
-
+    function testFuzzInvalidDeposit(uint256 amount_) public {
+        vm.assume(amount_ != floStaking.fixedStakingAmount());
+        vm.startPrank(user1);
+        vm.expectRevert("Incorrect Amount");
+        floStaking.deposit(amount_);
+        vm.stopPrank();
+    }
 }

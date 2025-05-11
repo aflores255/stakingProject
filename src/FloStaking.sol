@@ -24,8 +24,15 @@ contract FloStaking is Ownable {
     event Withdraw(address userAddress_, uint256 amount_);
     event ClaimRewards(address userAdress_, uint256 amount_);
     event EtherSent(uint256 amount_);
-    //Constructor
 
+    /**
+     * @notice Initializes the staking contract with parameters and ownership
+     * @param floToken_ Address of the FLO token contract
+     * @param owner_ Address to be set as the owner of the contract
+     * @param stakingPeriod_ Duration (in seconds) for which tokens must be staked
+     * @param fixedStakingAmount_ Fixed amount of tokens each user must stake
+     * @param rewardPerPeriod_ ETH amount to be rewarded per staking period
+     */
     constructor(
         address floToken_,
         address owner_,
@@ -40,8 +47,11 @@ contract FloStaking is Ownable {
     }
 
     //Functions
-    // Deposit FloToken
 
+    /**
+     * @notice Allows a user to deposit a fixed amount of FLO tokens into the staking contract
+     * @param tokenAmount_ The amount of FLO tokens to deposit (must equal fixedStakingAmount)
+     */
     function deposit(uint256 tokenAmount_) external {
         require(tokenAmount_ == fixedStakingAmount, "Incorrect Amount");
         require(userBalance[msg.sender] == 0, "Maximum deposit reached");
@@ -52,8 +62,10 @@ contract FloStaking is Ownable {
 
         emit Deposit(msg.sender, tokenAmount_);
     }
-    // Withdraw FloToken
 
+    /**
+     * @notice Allows a user to withdraw their staked FLO tokens
+     */
     function withdraw() external {
         uint256 userBalance_ = userBalance[msg.sender];
         require(userBalance[msg.sender] > 0, "No amount to withdraw");
@@ -63,8 +75,9 @@ contract FloStaking is Ownable {
         emit Withdraw(msg.sender, userBalance_);
     }
 
-    // Claim rewards
-
+    /**
+     * @notice Allows a user to claim their ETH rewards after the staking period
+     */
     function claimRewards() external {
         require(userBalance[msg.sender] == fixedStakingAmount, "Balance is zero");
         uint256 elapsePeriod = block.timestamp - rewardTime[msg.sender];
@@ -77,13 +90,17 @@ contract FloStaking is Ownable {
         emit ClaimRewards(msg.sender, rewardPerPeriod);
     }
 
-    // Feed Contract
-
+    /**
+     * @notice Allows the contract to receive ETH to fund future rewards
+     */
     receive() external payable onlyOwner {
         emit EtherSent(msg.value);
     }
 
-    // Change staking period
+    /**
+     * @notice Allows the contract owner to change the staking period
+     * @param newStakingPeriod_ New staking duration in seconds
+     */
     function changeStakingPeriod(uint256 newStakingPeriod_) external onlyOwner {
         stakingPeriod = newStakingPeriod_;
     }
