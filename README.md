@@ -57,7 +57,7 @@ This contract was developed and tested using **Foundry**, ensuring security and 
 
 The Flo Staking system is composed of modular smart contracts designed for security, clarity, and scalability. Below is a breakdown of the core contracts and how they interact:
 
-### 1. 🧠 `FloStaking.sol`
+### 1. 🧠 [`FloStaking.sol`](https://github.com/aflores255/stakingProject/blob/master/src/FloStaking.sol)
 This is the **main staking contract**. It allows users to stake a fixed amount of FLO tokens and earn rewards over a specified period.
 
 It also enforces:
@@ -65,7 +65,7 @@ It also enforces:
 - A minimum staking period (`stakingPeriod`).
 - A fixed reward per staking period (`rewardPerPeriod`).
 
-### 2. 💰 `FLOToken.sol`
+### 2. 💰 [`FloToken.sol`](https://github.com/aflores255/stakingProject/blob/master/src/FloToken.sol)
 An **ERC-20 compatible token** contract representing the native token of the platform: `FLO`. This is the token that users must hold and stake in order to participate in the staking program.
 - Fully compliant with the ERC-20 standard.
 - Can be minted and distributed as needed during deployment or testing.
